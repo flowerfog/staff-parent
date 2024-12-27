@@ -37,16 +37,12 @@
             <artifactId>staff-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>org.flowerfog</groupId>
             <artifactId>staff-common-model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.flowerfog</groupId>
-            <artifactId>staff-company</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
     </dependencies>
 </project>

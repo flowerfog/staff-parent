@@ -26,6 +26,17 @@
             <artifactId>jjwt</artifactId>
             <version>0.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flowerfog</groupId>
+            <artifactId>staff-common-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

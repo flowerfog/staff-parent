@@ -1,6 +1,12 @@
 package org.flowerfog.system.controller;
 
 import io.jsonwebtoken.Claims;
+import org.apache.catalina.security.SecurityUtil;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.Subject;
 import org.flowerfog.controller.BaseController;
 import org.flowerfog.domain.company.Company;
 import org.flowerfog.domain.company.response.DeptListResult;
@@ -21,7 +27,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.flowerfog.utils.PermissionConstants;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,12 +142,18 @@ public class UserController extends BaseController {
      * 响应
      */
     @RequestMapping(value = "/profile",method = RequestMethod.POST)
-    public Result profile() throws Exception {
+    public Result profile(HttpServletRequest request) throws Exception {
+
+        Subject subject = SecurityUtils.getSubject();
+
+        PrincipalCollection principals = subject.getPrincipals();
+
+        ProfileResult result = (ProfileResult) principals.getPrimaryPrincipal();
 
 
-        String userId = claims.getId();
-        User user = userService.findById(userId);
-        ProfileResult result = new ProfileResult(user);
+
+
+
         return new Result(ResultCode.SUCCESS,result);
 
     }
@@ -150,36 +164,52 @@ public class UserController extends BaseController {
      * 登录
      * 通过service查询账号
      * 比较password
-     *生成jwt信息
+     * 生成jwt信息
      */
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
-    public Result login(@RequestBody Map<String,String> loginMap){
+    @RequestMapping(value="/login",method = RequestMethod.POST)
+    public Result login(@RequestBody Map<String,String> loginMap) {
         String mobile = loginMap.get("mobile");
         String password = loginMap.get("password");
-        User user = userService.findByMobile(mobile);
-        if(user==null|| user.getPassword().equals(password)){
+        try {
+            //1.构造登录令牌 UsernamePasswordToken
+            //加密密码
+            password = new Md5Hash(password,mobile,3).toString();  //1.密码，盐，加密次数
+            UsernamePasswordToken upToken = new UsernamePasswordToken(mobile,password);
+            //2.获取subject
+            Subject subject = SecurityUtils.getSubject();
+            //3.调用login方法，进入realm完成认证
+            subject.login(upToken);
+            //4.获取sessionId
+            String sessionId = (String)subject.getSession().getId();
+            //5.构造返回结果
+            return new Result(ResultCode.SUCCESS,sessionId);
+        }catch (Exception e) {
             return new Result(ResultCode.MOBILEEORPASSWORDERROR);
-        }else {
-            //登录成功
-
-            //api权限字符串
-            StringBuilder sb = new StringBuilder();
-            //获取APi权限
-            for (Role role : user.getRoles()){
-                for (Permission permission : role.getPermissions()){
-                    if (permission.getType() == PermissionConstants.PERMISSION_API){
-                        sb.append(permission.getCode()).append(",");
-                    }
-                }
-            }
-            Map<String,Object> map = new HashMap<>();
-            map.put("apis",sb.toString());//可访问api权限字符串
-            map.put("companyId",user.getCompanyId());
-            map.put("companyName",user.getCompanyName());
-            String token = jwtUtils.createJwt(user.getId(), user.getUsername(), map);
-
-            return new Result(ResultCode.SUCCESS,token);
         }
-    }
 
+
+//        User user = userService.findByMobile(mobile);
+//        //登录失败
+//        if(user == null || !user.getPassword().equals(password)) {
+//            return new Result(ResultCode.MOBILEORPASSWORDERROR);
+//        }else {
+//            //登录成功
+//            //api权限字符串
+//            StringBuilder sb = new StringBuilder();
+//            //获取到所有的可访问API权限
+//            for (Role role : user.getRoles()) {
+//                for (Permission perm : role.getPermissions()) {
+//                    if(perm.getType() == PermissionConstants.PERMISSION_API) {
+//                        sb.append(perm.getCode()).append(",");
+//                    }
+//                }
+//            }
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("apis",sb.toString());//可访问的api权限字符串
+//            map.put("companyId",user.getCompanyId());
+//            map.put("companyName",user.getCompanyName());
+//            String token = jwtUtils.createJwt(user.getId(), user.getUsername(), map);
+//            return new Result(ResultCode.SUCCESS,token);
+//        }
+    }
 }

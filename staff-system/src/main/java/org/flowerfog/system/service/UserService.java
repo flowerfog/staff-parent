@@ -1,6 +1,7 @@
 package org.flowerfog.system.service;
 
 
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.flowerfog.system.dao.RoleDao;
 import org.flowerfog.domain.system.Role;
 import org.flowerfog.domain.system.User;
@@ -45,7 +46,12 @@ public class UserService {
     public void save(User user){
         //设置主键值
         String id =idWorker.nextId()+"";
-        user.setPassword("123456");
+
+        String password = new Md5Hash(user.getMobile(), user.getPassword(), 3).toString();
+
+
+        user.setLevel("user");
+        user.setPassword(password);
         user.setEnableState(1);
         user.setId(id);
         //调用dao保存
