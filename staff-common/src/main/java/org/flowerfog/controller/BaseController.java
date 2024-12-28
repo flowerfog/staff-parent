@@ -12,32 +12,29 @@ import javax.servlet.http.HttpServletResponse;
 
 
 public class BaseController {
-    public HttpServletRequest request;
-    public HttpServletResponse response;
-    protected String companyId;
-    protected String companyName;
 
+    protected HttpServletRequest request;
+    protected HttpServletResponse response;
+    protected String companyId;
+    protected String userId;
+    protected String companyName;
     protected Claims claims;
 
-    //jwt
+    //使用jwt方式获取
 //    @ModelAttribute
-//    public void setResAnReq(HttpServletRequest request,HttpServletResponse response){
-//        this.request=request;
-//        this.response=response;
+//    public void setResAnReq(HttpServletRequest request,HttpServletResponse response) {
+//        this.request = request;
+//        this.response = response;
 //
 //        Object obj = request.getAttribute("user_claims");
-//        if (obj != null){
-//            this.claims =(Claims) obj;
-//            //TODO
-//            this.companyId= (String) claims.get("companyId");
-//            this.companyName = (String) claims.get("companyName");
+//
+//        if(obj != null) {
+//            this.claims = (Claims) obj;
+//            this.companyId = (String)claims.get("companyId");
+//            this.companyName = (String)claims.get("companyName");
 //        }
-//
-//
-//
 //    }
 
-    //shiro
     //使用shiro获取
     @ModelAttribute
     public void setResAnReq(HttpServletRequest request,HttpServletResponse response) {
@@ -53,6 +50,9 @@ public class BaseController {
             ProfileResult result = (ProfileResult)principals.getPrimaryPrincipal();
             this.companyId = result.getCompanyId();
             this.companyName = result.getCompany();
+            this.userId = result.getUserId();
         }
     }
+
 }
+

@@ -5,6 +5,7 @@ import org.flowerfog.utils.JwtUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
@@ -12,6 +13,7 @@ import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 @SpringBootApplication(scanBasePackages = "org.flowerfog")
 //2.配置jpa注解的扫描
 @EntityScan(value="org.flowerfog.domain.system")
+@EnableEurekaClient
 public class SystemApplication {
     /**
      * 启动方法
